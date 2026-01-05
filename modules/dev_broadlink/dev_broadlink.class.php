@@ -363,7 +363,7 @@ function usual(&$out) {
   if ($this->config['API_URL']=='httpbrige') {
    $table='dev_httpbrige_devices';
    $properties=SQLSelect("SELECT * FROM $table WHERE LINKED_OBJECT LIKE '".DBSafe($object)."'");
-   $total=count($properties);
+   $total = is_array($properties) ? count($properties) : 0;
    if ($total) {
     for($i=0;$i<$total;$i++) {
      //to-do
@@ -392,7 +392,7 @@ function usual(&$out) {
   } else {
 	$table='dev_broadlink_commands';
 	$properties=SQLSelect("SELECT * FROM $table WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
-	$total=count($properties);
+	$total = is_array($properties) ? count($properties) : 0;
 	if ($total) {
     for($i=0;$i<$total;$i++) {
 		$id=$properties[$i]['DEVICE_ID'];
@@ -631,7 +631,8 @@ function usual(&$out) {
  function table_data_set($prop, $dev_id, $val, $sg_val = NULL, $batt = false) {
 	$table='dev_broadlink_commands';
 	$properties=SQLSelectOne("SELECT * FROM $table WHERE TITLE='$prop' AND DEVICE_ID='$dev_id'");
-	$total=count($properties);
+	// Проверка на существование записи (совместимость с PHP 8+)
+	$total = (is_array($properties) && isset($properties['ID'])) ? 1 : 0;
 	if ($total) {
 		if($this->config['VAL_UPDATE']=='on_change' && $val!=$properties['VALUE']) {
 			$need_rec=true;

@@ -21,9 +21,21 @@ $old_second = date('s');
 $old_minute = date('i');
 $old_hour = date('h');
 
+// Инициализация счетчиков
+$s2 = 1;
+$s3 = 1;
+$s5 = 1;
+$s20 = 1;
+$m5 = 1;
+$m10 = 1;
+
 $tmp = SQLSelectOne("SELECT ID FROM dev_httpbrige_devices LIMIT 1");
-if (!$tmp['ID'])
+if (!$tmp['ID']) {
+   // Обновляем статус перед выходом, чтобы показать, что цикл проверялся
+   setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
+   DebMes("Cycle " . basename(__FILE__) . " exited: no devices found in dev_httpbrige_devices", 'boot');
    exit; // no devices added -- no need to run this cycle
+}
 echo date("H:i:s") . " running " . basename(__FILE__) . PHP_EOL;
 $latest_check=0;
 $checkEvery=5; // poll every 5 seconds
