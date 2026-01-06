@@ -25,6 +25,7 @@ $old_hour = date('h');
 $s2 = 1;
 $s3 = 1;
 $s5 = 1;
+$s10 = 1;
 $s20 = 1;
 $m5 = 1;
 $m10 = 1;
@@ -38,7 +39,7 @@ if (!$tmp['ID']) {
 }
 echo date("H:i:s") . " running " . basename(__FILE__) . PHP_EOL;
 $latest_check=0;
-$checkEvery=5; // poll every 5 seconds
+$checkEvery=5; // poll every 5 secondsm
 
 while (1)
 {

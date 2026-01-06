@@ -79,9 +79,9 @@
 			$response = '';
 			$rm = Broadlink::CreateDevice($rec['IP'], $rec['MAC'], 80, $rec['DEVTYPE']);
 			if( !is_null($rm) && ( ($this->config['VAL_PING']!='true') || $rm->ping()) ) {
-				if(isset($rec['KEYS']) && $rec['KEYS']!='') {
+				if(isset($rec['KEYS']) && $rec['KEYS']!=''&& $rec['KEYS']!= false) {
 					$decoded_keys=json_decode($rec['KEYS']);
-					if (time()-$decoded_keys->time > 604800) {
+					if (time()-(int)$decoded_keys->time > 604800) {
 						$keys=$rm->Auth();
 						$rec['KEYS']=json_encode($keys);
 					} else {

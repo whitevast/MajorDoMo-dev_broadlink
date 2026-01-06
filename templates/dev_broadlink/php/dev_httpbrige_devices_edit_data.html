@@ -99,7 +99,7 @@
  [#else ID#]
  <button type="submit" name="subm" value="Add" class="btn btn-primary"><#LANG_ADD#></button>
  [#endif ID#]
-  [#if TYPE=="rm" || TYPE=="rm3"#]<a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data_usage" class="btn btn-default">Использование команд</a>
+  [#if TYPE=="rm" || TYPE=="rm3" || TYPE=="rm4pro"#]<a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data_usage" class="btn btn-default">Использование команд</a>
   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data_export" class="btn btn-default">Экспорт</a>
   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data_import" class="btn btn-default">Импорт</a>[#endif TYPE#]
  <a href="?data_source=<#DATA_SOURCE#>" class="btn btn-default "><#LANG_CANCEL#></a>

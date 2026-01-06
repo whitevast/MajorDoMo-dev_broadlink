@@ -29,26 +29,22 @@ $current .= "in if $res[0]['ID']\n";
 }
 
 
-function Scan()
-{
-$result = array();
-$devices = Broadlink::Discover();
-
- 
-   foreach ($devices as $device) {
-	$obj = array();
-	$obj['DEVTYPE'] = $device->devtype();
-	$obj['NAME'] = $device->name();
-	$obj['MAC'] = $device->mac();
-	$obj['HOST'] = $device->host();
-	$obj['MODEL'] = $device->devmodel();
-	array_push($result, $obj);
-}
+function Scan(){
+	$result = array();
+	$devices = Broadlink::Discover();
+	foreach ($devices as $device) {
+		$obj = array();
+		$obj['DEVTYPE'] = $device->devtype();
+		$obj['NAME'] = $device->name();
+		$obj['MAC'] = $device->mac();
+		$obj['HOST'] = $device->host();
+		$obj['MODEL'] = $device->devmodel();
+		array_push($result, $obj);
+	}
     return $result;
 }
 
-function array_search_result($array, $key, $value)
-{
+function array_search_result($array, $key, $value){
     foreach ($array as $k => $v) {
         if (array_key_exists($key, $v) && ($v[$key] == $value)) {
             return true;

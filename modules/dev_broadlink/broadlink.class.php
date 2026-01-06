@@ -63,7 +63,6 @@ class Broadlink{
 
 		}
 
-
 		$this->count = rand(0, 0xffff);
 
 	}
@@ -74,7 +73,6 @@ class Broadlink{
 	}
 
 	public static function CreateDevice($h = "", $m = "", $p = 80, $d = 0){
-
 		switch (self::model($d)) {
 			case 0:
 				return new SP1($h, $m, $p, $d);
@@ -84,9 +82,6 @@ class Broadlink{
 				break;
 			case 2:
 				return new RM($h, $m, $p, $d);
-				break;
-      case 24:
-				return new RM4($h, $m, $p, $d);
 				break;
 			case 3:
 				return new A1($h, $m, $p, $d);
@@ -105,6 +100,9 @@ class Broadlink{
 				break;
 			case 8:
 				return new HYSEN($h, $m, $p, $d);
+				break;
+			case 24:
+				return new RM4($h, $m, $p, $d);
 				break;
 			case 100:
 				return new UNK($h, $m, $p, $d);
@@ -297,6 +295,10 @@ class Broadlink{
 				$model = "RM4 Pro";
 				$type = 24;
 				break;
+			case 0x520b:
+				$model = "RM4 Pro";
+				$type = 24;
+				break;
 			case 0x2714:
 			case 0x27a3:
 				$model = "A1";
@@ -485,10 +487,10 @@ class Broadlink{
 
 		socket_sendto($cs, self::byte($packet), sizeof($packet), 0, '255.255.255.255', 80);
 		while(socket_recvfrom($cs, $response, 2048, 0, $from, $port)){
-
 			$host = '';
 			$responsepacket = self::byte2array($response);
-			$devtype = hexdec(sprintf("%x%x", $responsepacket[0x35], $responsepacket[0x34]));
+			if($responsepacket[0x34] < 16) $devtype = hexdec(sprintf("%x0%x", $responsepacket[0x35], $responsepacket[0x34]));
+			else $devtype = hexdec(sprintf("%x%x", $responsepacket[0x35], $responsepacket[0x34]));
 			$host_array = array_slice($responsepacket, 0x36, 4);
 			$mac = array_slice($responsepacket, 0x3a, 6);
 			if (array_slice($responsepacket, 0, 8) !== array(0x5a, 0xa5, 0xaa, 0x55, 0x5a, 0xa5, 0xaa, 0x55)) {
@@ -501,7 +503,6 @@ class Broadlink{
 
 			$host = substr($host, 0, strlen($host) - 1);
 			$device = Broadlink::CreateDevice($host, $mac, 80, $devtype);
-
 			if($device != NULL){
 				$device->name = str_replace(array("\0","\2"), '', Broadlink::byte(array_slice($responsepacket, 0x40)));
 				array_push($devices, $device);
@@ -537,17 +538,17 @@ class Broadlink{
 		$packet[0x05] = 0xa5;
 		$packet[0x06] = 0xaa;
 		$packet[0x07] = 0x55;
-		$packet[0x24] = 0x2a;
-		$packet[0x25] = 0x27;
+		$packet[0x24] = 0x0b;
+		$packet[0x25] = 0x52;
 		$packet[0x26] = $command;
 		$packet[0x28] = $this->count & 0xff;
 		$packet[0x29] = $this->count >> 8;
-		$packet[0x2a] = $this->mac[0];
-		$packet[0x2b] = $this->mac[1];
-		$packet[0x2c] = $this->mac[2];
-		$packet[0x2d] = $this->mac[3];
-		$packet[0x2e] = $this->mac[4];
-		$packet[0x2f] = $this->mac[5];
+		$packet[0x2a] = hexdec($this->mac[0]);
+		$packet[0x2b] = hexdec($this->mac[1]);
+		$packet[0x2c] = hexdec($this->mac[2]);
+		$packet[0x2d] = hexdec($this->mac[3]);
+		$packet[0x2e] = hexdec($this->mac[4]);
+		$packet[0x2f] = hexdec($this->mac[5]);
 		$packet[0x30] = $this->id[0];
 		$packet[0x31] = $this->id[1];
 		$packet[0x32] = $this->id[2];
@@ -560,7 +561,6 @@ class Broadlink{
 		}
 
 		$aes = $this->byte2array(aes128_cbc_encrypt($this->key(), $this->byte($payload), $this->iv()));
-
 		$packet[0x34] = $checksum & 0xff;
 		$packet[0x35] = $checksum >> 8;
 
@@ -611,6 +611,7 @@ class Broadlink{
 			$payload[0x10] = 0x31;
 			$payload[0x11] = 0x31;
 			$payload[0x12] = 0x31;
+			$payload[0x12] = 0x31;
 			$payload[0x1e] = 0x01;
 			$payload[0x2d] = 0x01;
 			$payload[0x30] = ord('T');
@@ -618,10 +619,10 @@ class Broadlink{
 			$payload[0x32] = ord('s');
 			$payload[0x33] = ord('t');
 			$payload[0x34] = ord(' ');
-			$payload[0x35] = ord(' ');
-			$payload[0x36] = ord('1');
+			$payload[0x35] = ord('1');
 
 			$response = $this->send_packet(0x65, $payload);
+			
 			if (empty($response))
 				return false;
 
@@ -1073,7 +1074,7 @@ class RM extends Broadlink{
 
 		$this->send_packet(0x6a, $packet);
 	}
-
+	
 	public function Check_data(){
 
 		$code = array();
@@ -1166,7 +1167,14 @@ class RM4 extends Broadlink{
 			}
 		}
 
-		$this->send_packet(0x6a, $packet);
+		$checksum = sizeof($packet) - 2;
+		$packet[0] = $checksum & 0xFF;
+		$packet[1] = $checksum >> 8;
+
+		$response = $this->send_packet(0x6a, $packet);
+        $err = hexdec(sprintf("%x%x", $response[0x23], $response[0x22]));
+        return($err);
+		
 	}
 
 	public function Check_data(){

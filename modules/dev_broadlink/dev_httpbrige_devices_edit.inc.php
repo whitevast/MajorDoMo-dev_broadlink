@@ -137,14 +137,13 @@
   }
   }
 
-    if ($this->tab=='data'||$this->tab=='data_usage') {
-		$this->getConfig();
-   $new_id=0;
+  if ($this->tab=='data'||$this->tab=='data_usage') {
+	$this->getConfig();
+	$new_id=0;
 
-
-   global $relearn_id;
-   if ($relearn_id) {
-    $data=SQLSelectOne("SELECT * FROM dev_broadlink_commands WHERE ID='$relearn_id'");
+	$relearn_id = gr('relearn_id');
+	if ($relearn_id) {
+	$data=SQLSelectOne("SELECT * FROM dev_broadlink_commands WHERE ID='$relearn_id'");
 	$rm = Broadlink::CreateDevice($rec['IP'], $rec['MAC'], 80, $rec['DEVTYPE']);
 	$decoded_keys=json_decode($rec['KEYS']);
 	$rm->Auth($decoded_keys->id, $decoded_keys->key);
@@ -178,7 +177,7 @@
 	$rm = Broadlink::CreateDevice($rec['IP'], $rec['MAC'], 80, $rec['DEVTYPE']);
 	$decoded_keys=json_decode($rec['KEYS']);
 	$rm->Auth($decoded_keys->id, $decoded_keys->key);
-	if($rec['TYPE']=='rm'||$rec['TYPE']=='rm3'){
+	if($rec['TYPE']=='rm' || $rec['TYPE']=='rm3' || $rec['TYPE']=='rm4pro'){
 		$rm->Send_data($data['VALUE']);
 	} elseif($rec['TYPE'] == 'sp2' || $rec['TYPE'] == 'spmini' || $rec['TYPE']=='sp3s' || $rec['TYPE'] == 'sc1') {
 		if($data['VALUE']==1){
@@ -302,6 +301,7 @@
 		$export[$i]['data']=$properties[$i]['VALUE'];
 		$export[$i]['mac']=$rec['MAC'];
 	}
+	
 	if($this->config['DATA_EXPORT_TYPE'] == "CSV") {
 			$out['TEXTAREA']=generateCsv($export);
 	} else {
@@ -309,7 +309,7 @@
 	}
   }
   if($this->tab=='data_import' && $this->mode=='update') {
-	global $textarea;
+	$textarea = gr('textarea');
 	if($this->config['DATA_EXPORT_TYPE'] == "CSV") {
 				$flat_array = array_map("str_getcsv", explode("\n", $textarea));
 				$columns = $flat_array[0];
